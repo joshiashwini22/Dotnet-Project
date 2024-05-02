@@ -12,8 +12,13 @@ namespace BisleriumProject.Infrastructures.Persistence
 
 
         }
-
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+        }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Comment> Comments { get; set; }
     }
 }

@@ -15,7 +15,7 @@ namespace BisleriumProject.Infrastructures.DI
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite(configuration.GetConnectionString("dev"),
+                options.UseNpgsql(configuration.GetConnectionString("dev"),
                 b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)), ServiceLifetime.Transient);
             return services;
         }
