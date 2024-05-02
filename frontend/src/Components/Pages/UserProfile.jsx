@@ -5,6 +5,8 @@ import '../css/UserProfile.css'; // Import CSS file for styling
 
 const UserProfile = () => {
   return (
+    
+    <div className="box">
     <div className="user-profile">
       <h2>User Profile</h2>
       <div className="profile-details">
@@ -21,6 +23,10 @@ const UserProfile = () => {
         <button>Update Profile</button>
         <button>Delete Profile</button>
       </div>
+      <div className="changepw">
+        <p><a href="#"> Change Password</a></p>
+      </div>
+    </div>
     </div>
   );
 };
