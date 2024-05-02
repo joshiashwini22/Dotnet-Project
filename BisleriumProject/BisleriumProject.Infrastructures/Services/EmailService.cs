@@ -2,14 +2,10 @@
 using BisleriumProject.Application.Common.Interface.IServices;
 using BisleriumProject.Application.Helpers;
 using BisleriumProject.Domain.Auth;
-using BisleriumProject.Domain.Entities;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.AspNet.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System.Net;
 
 namespace BisleriumProject.Infrastructures.Services

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BisleriumProject.Infrastructures")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+97724854d251339b57e9ab09a02ca373dcd4c1ec")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fee7cef077e186aba79a7714c4a380f64562ccc4")]
 [assembly: System.Reflection.AssemblyProductAttribute("BisleriumProject.Infrastructures")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BisleriumProject.Infrastructures")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
