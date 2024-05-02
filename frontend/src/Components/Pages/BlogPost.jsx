@@ -12,15 +12,17 @@ const BlogPost = () => {
         <p className="blog-post-author">Author Name</p>
         <p className="blog-post-date">April 30, 2024</p>
         <div className="category">
-           <p>Category</p>
-          </div>
+          <p>Category</p>
+        </div>
         <p className="blog-post-text">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut urna eu nulla congue placerat. Nulla facilisi. 
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut urna eu nulla congue placerat. Nulla facilisi.
           Vestibulum sodales sapien nec nisi fringilla, at tristique justo luctus. Quisque ut lorem et eros eleifend fermentum.
         </p>
+        <br />
+        <br />
         <div className="readmore">
-            <a href="#">Read More</a>
-          </div>
+          <a href="#">Read More</a>
+        </div>
       </div>
     </div>
   );
