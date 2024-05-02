@@ -1,14 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Net;
 
 namespace BisleriumProject.Application.Helpers
 {
     public class Response
     {
-        public string Status { get; set; }
-        public string Message { get; set; }
+        public Response(object? data, List<string>? errors = null, HttpStatusCode statusCode = HttpStatusCode.OK)
+        {
+            StatusCode = statusCode;
+            Data = data;
+            Errors = errors == null ? new List<string>() : errors;
+        }
+        public HttpStatusCode StatusCode { get; set; }
+        public object Data { get; set; }
+        public List<string> Errors { get; set; }
     }
 }

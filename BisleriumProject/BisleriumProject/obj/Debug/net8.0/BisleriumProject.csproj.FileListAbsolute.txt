@@ -290,3 +290,7 @@ C:\Users\ashwi\Documents\GitHub\BisleriumGroupProject\BisleriumProject\Bislerium
 C:\Users\ashwi\Documents\GitHub\BisleriumGroupProject\BisleriumProject\BisleriumProject\obj\Debug\net8.0\BisleriumProject.genruntimeconfig.cache
 C:\Users\ashwi\Documents\GitHub\BisleriumGroupProject\BisleriumProject\BisleriumProject\obj\Debug\net8.0\ref\BisleriumProject.dll
 C:\Users\ashwi\Documents\GitHub\BisleriumGroupProject\BisleriumProject\BisleriumProject\bin\Debug\net8.0\Microsoft.AspNet.Identity.Core.dll
+C:\Users\ashwi\Documents\GitHub\BisleriumGroupProject\BisleriumProject\BisleriumProject\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
+C:\Users\ashwi\Documents\GitHub\BisleriumGroupProject\BisleriumProject\BisleriumProject\bin\Debug\net8.0\MailKit.dll
+C:\Users\ashwi\Documents\GitHub\BisleriumGroupProject\BisleriumProject\BisleriumProject\bin\Debug\net8.0\MimeKit.dll
+C:\Users\ashwi\Documents\GitHub\BisleriumGroupProject\BisleriumProject\BisleriumProject\bin\Debug\net8.0\NETCore.MailKit.dll
