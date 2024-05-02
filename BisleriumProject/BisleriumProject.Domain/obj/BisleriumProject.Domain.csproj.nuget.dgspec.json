@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ashwi\\Documents\\AD\\BisleriumProject\\BisleriumProject.Domain\\BisleriumProject.Domain.csproj": {}
+    "C:\\Users\\ashwi\\Documents\\GitHub\\BisleriumGroupProject\\BisleriumProject\\BisleriumProject.Domain\\BisleriumProject.Domain.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ashwi\\Documents\\AD\\BisleriumProject\\BisleriumProject.Domain\\BisleriumProject.Domain.csproj": {
+    "C:\\Users\\ashwi\\Documents\\GitHub\\BisleriumGroupProject\\BisleriumProject\\BisleriumProject.Domain\\BisleriumProject.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ashwi\\Documents\\AD\\BisleriumProject\\BisleriumProject.Domain\\BisleriumProject.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\ashwi\\Documents\\GitHub\\BisleriumGroupProject\\BisleriumProject\\BisleriumProject.Domain\\BisleriumProject.Domain.csproj",
         "projectName": "BisleriumProject.Domain",
-        "projectPath": "C:\\Users\\ashwi\\Documents\\AD\\BisleriumProject\\BisleriumProject.Domain\\BisleriumProject.Domain.csproj",
+        "projectPath": "C:\\Users\\ashwi\\Documents\\GitHub\\BisleriumGroupProject\\BisleriumProject\\BisleriumProject.Domain\\BisleriumProject.Domain.csproj",
         "packagesPath": "C:\\Users\\ashwi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ashwi\\Documents\\AD\\BisleriumProject\\BisleriumProject.Domain\\obj\\",
+        "outputPath": "C:\\Users\\ashwi\\Documents\\GitHub\\BisleriumGroupProject\\BisleriumProject\\BisleriumProject.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -45,6 +45,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.4, )"
+            },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.4, )"
