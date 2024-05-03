@@ -1,11 +1,16 @@
 ﻿using BisleriumProject.Application.Common.Interface.IRepositories;
+using BisleriumProject.Application.Helpers;
+using BisleriumProject.Domain.Shared;
 using BisleriumProject.Infrastructures.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace BisleriumProject.Infrastructures.Repositories
 {
     public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     {
         protected AppDbContext _appDbContext;
+
+        
 
         public RepositoryBase(AppDbContext appDbContext)
         {

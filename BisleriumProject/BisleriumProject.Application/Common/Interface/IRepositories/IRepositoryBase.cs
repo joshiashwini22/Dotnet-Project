@@ -8,6 +8,8 @@ namespace BisleriumProject.Application.Common.Interface.IRepositories
         Task<T> Add(T entity);
         Task<T> Update(T entity);
         void Delete(string entityId);
+
         Task<T>? GetById(string entityId);
+        //Task<IEnumerable<T>> GetAll(GetRequest<T>? request);
     }
 }

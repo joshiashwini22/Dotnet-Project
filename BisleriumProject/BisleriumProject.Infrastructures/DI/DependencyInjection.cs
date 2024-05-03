@@ -1,4 +1,12 @@
-﻿using BisleriumProject.Infrastructures.Persistence;
+﻿using BisleriumProject.Application.Common.Interface.IRepositories;
+using BisleriumProject.Application.Common.Interface.IServices;
+using BisleriumProject.Domain.Auth;
+using BisleriumProject.Domain.Entities;
+using BisleriumProject.Infrastructures.Persistence;
+using BisleriumProject.Infrastructures.Repositories;
+using BisleriumProject.Infrastructures.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +25,36 @@ namespace BisleriumProject.Infrastructures.DI
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("dev"),
                 b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)), ServiceLifetime.Transient);
+            return services;
+
+            services.AddIdentity<User, IdentityRole>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+            })
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+
+            //services.AddScoped<IAppDbContext>(provider => provider.GetService<AppDbContext>());
+
+            services.AddTransient(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
+            services.AddTransient<IUserRepository, UserRepository>();
+            //services.AddTransient<IPostRepository, PostRepository>();
+            //services.AddTransient<ICommentRepository, CommentRepository>();
+
+            //services.AddTransient<IAuthenticationService, AuthenticationService>();
+
+
+            services.AddTransient<IEmailService, EmailService>();
+            //services.AddTransient<IPostService, PostService>();
+            //services.AddTransient<ICommentService, CommentService>();
+
+            services.AddSingleton<EmailConfiguration>();
+
             return services;
         }
     }

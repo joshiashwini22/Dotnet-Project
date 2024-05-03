@@ -2,10 +2,13 @@
 using BisleriumProject.Application.Common.Interface.IServices;
 using BisleriumProject.Application.Helpers;
 using BisleriumProject.Domain.Auth;
+using BisleriumProject.Domain.Entities;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System.Net;
 
 namespace BisleriumProject.Infrastructures.Services
@@ -14,10 +17,12 @@ namespace BisleriumProject.Infrastructures.Services
     {
         private readonly EmailConfiguration _emailConfig;
         private readonly IUserRepository _userRepository;
-        public EmailService(IOptions<EmailConfiguration> emailConfig, IUserRepository userRepository)
+        private readonly UserManager<User> _userManager;
+
+        public EmailService(IOptions<EmailConfiguration> emailConfig, UserManager<User> userManager)
         {
             _emailConfig = emailConfig.Value;
-            _userRepository = userRepository;
+            _userManager = userManager;
         }
         public Response SendEmail(EmailMessage message, List<string> errors)
         {
@@ -32,9 +37,8 @@ namespace BisleriumProject.Infrastructures.Services
 
             foreach (var email in emails)
             {
-                //var user = _userRepository.GetAll(email).FirstOrDefault();
+                var user = _userManager.FindByEmailAsync(email);
 
-                var user = "";
                 if (user == null)
                 {
                     errors.Add($"User with email {email} does not exist.");
