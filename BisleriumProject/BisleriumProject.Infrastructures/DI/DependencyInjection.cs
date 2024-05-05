@@ -50,14 +50,15 @@ namespace BisleriumProject.Infrastructures.DI
             services.AddTransient(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IBlogRepository, BlogRepository>();
-            //services.AddTransient<ICommentRepository, CommentRepository>();
+            services.AddTransient<ICommentRepository, CommentRepository>();
 
             //services.AddTransient<IAuthenticationService, AuthenticationService>();
 
 
             services.AddTransient<IEmailService, EmailService>();
             services.AddTransient<IBlogService, BlogService>();
-            //services.AddTransient<ICommentService, CommentService>();
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<ICommentService, CommentService>();
 
             services.AddSingleton<EmailConfiguration>();
 
