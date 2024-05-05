@@ -10,5 +10,8 @@ namespace BisleriumProject.Application.Common.Interface.IServices
         Task<List<BlogDTO>> GetBlogsByUserId(string id);
         Task<string> AddBlog(AddBlogDTO blog, List<string> errors);
         Task<string> DeleteBlog(int id,List<string> errors);
+        Task<string> UpdateBlog(UpdateBlogDTO updateBlogDTO, List<string> errors);
+        Task<BlogDTO> GetBlogById(int blogId);
+
     }
 }

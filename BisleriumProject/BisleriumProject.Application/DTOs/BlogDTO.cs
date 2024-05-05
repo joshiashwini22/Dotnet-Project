@@ -19,6 +19,10 @@ namespace BisleriumProject.Application.DTOs
         public List<string> Category { get; set; }
         public string Image { get; set; }
         public string UserId { get; set; }
+        public int Score { get; set; }
+        public int UpVoteCount { get; set; }
+        public int DownVoteCount { get; set; }
+
     }
     public class AddBlogDTO
     {
@@ -26,11 +30,16 @@ namespace BisleriumProject.Application.DTOs
         public string Description { get; set; }
         public List<string> Category { get; set; }
         public IFormFile? Image { get; set; }
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
     }
 
-    public class UpdateBlogDTO : AddBlogDTO
+    public class UpdateBlogDTO 
     {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public List<string>? Category { get; set; }
+        public IFormFile? Image { get; set; }
+        public string? UserId { get; set; }
         public int BlogId { get; set; }
     }
 }

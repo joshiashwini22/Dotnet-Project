@@ -14,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 
+builder.Services.AddInfrastructure(builder.Configuration);
 
 
 // 3. Adding Authentication
@@ -21,7 +22,6 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 
 // 4. Adding Jwt Bearer
@@ -38,6 +38,9 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
         };
     });
+
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -82,7 +85,6 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
@@ -98,6 +100,8 @@ app.UseCors("_myAllowSpecificOrigins");
 app.UseHttpsRedirection();
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

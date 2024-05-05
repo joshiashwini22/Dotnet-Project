@@ -40,14 +40,16 @@ namespace BisleriumProject.Controllers
 
             var userRoles = await _userManager.GetRolesAsync(user);
             var authClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+        {
+            new Claim("name", user.UserName), // User name claim
+            new Claim("userId", user.Id), // Custom claim key for UserId
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique token ID
+        };
 
+            // Add role claims
             foreach (var role in userRoles)
             {
-                authClaims.Add(new Claim(ClaimTypes.Role, role));
+                authClaims.Add(new Claim("role", role)); // Role claims
             }
 
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
@@ -80,6 +82,7 @@ namespace BisleriumProject.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, new Response(null, new List<string> { "User already exists." }, HttpStatusCode.InternalServerError));
             }
 
+
             var user = new User
             {
                 Email = model.Email,
@@ -92,6 +95,14 @@ namespace BisleriumProject.Controllers
             {
                 return StatusCode((int)HttpStatusCode.InternalServerError, new Response(null, new List<string> { "User creation failed. Please check the details and try again." }, HttpStatusCode.InternalServerError));
             }
+
+            // Ensure the admin role exists, create if necessary
+            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+            }
+
+            await _userManager.AddToRoleAsync(user, UserRoles.User);
 
             return Ok(new Response(
                 "User created successfully.",

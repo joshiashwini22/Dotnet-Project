@@ -20,6 +20,7 @@ namespace BisleriumProject.Controllers
             _blogService = blogService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -34,11 +35,33 @@ namespace BisleriumProject.Controllers
             }
         }
 
-        [HttpGet("get-by-user")]
-        public async Task<IActionResult> GetBlogsByUserId(string userId)
+        [AllowAnonymous]
+        [HttpGet("get-by-id/{blogId}")]
+        public async Task<IActionResult> GetBlogById(int blogId) // Get blog by ID
         {
             try
             {
+                var blogDTO = await _blogService.GetBlogById(blogId); // Call the service method
+                return Ok(blogDTO); // Return the blog DTO
+            }
+            catch (KeyNotFoundException ex) // Handle case where the blog doesn't exist
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex) // Handle unexpected errors
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = ex.Message });
+            }
+        }
+
+        [Authorize]
+        [HttpGet("get-by-user")]
+        public async Task<IActionResult> GetBlogsByUserId()
+        {
+            try
+            {
+                var userId = User.FindFirst("userId")?.Value; 
+
                 var blogDTOs = await _blogService.GetBlogsByUserId(userId);
                 return Ok(blogDTOs);
             }
@@ -52,13 +75,23 @@ namespace BisleriumProject.Controllers
             }
         }
 
-        //[Authorize] // Optionally require authorization for this endpoint
+        [Authorize] 
         [HttpPost("add")]
         public async Task<IActionResult> AddBlog([FromForm] AddBlogDTO blogDTO)
         {
             var errors = new List<string>();
             try
             {
+                // Retrieve the user ID from the JWT claim
+                var userId = User.FindFirst("userId")?.Value; // Adjust based on your JWT claims
+
+                if (string.IsNullOrEmpty(userId)) // If UserId is not found in the token
+                {
+                    return Unauthorized(new { message = "User ID not found in token." });
+                }
+
+                blogDTO.UserId = userId;
+
                 var response = await _blogService.AddBlog(blogDTO, errors); // Ensure awaiting asynchronous operation
 
                 if (errors.Count > 0) // If there are validation errors
@@ -75,7 +108,7 @@ namespace BisleriumProject.Controllers
         }
 
 
-        //[Authorize] // Optionally require authorization for this endpoint
+        [Authorize] 
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteBlog(int id)
         {
@@ -91,8 +124,34 @@ namespace BisleriumProject.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message); // Handle internal errors
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
+        }
+
+        [Authorize]
+        [HttpPut("update-blog")]
+        public async Task<IActionResult> UpdateBlog([FromForm] UpdateBlogDTO updateBlogDTO)
+        {
+
+            // Retrieve the user ID from the JWT claim
+            var userId = User.FindFirst("userId")?.Value; // Adjust based on your JWT claims
+
+            if (string.IsNullOrEmpty(userId)) // If UserId is not found in the token
+            {
+                return Unauthorized(new { message = "User ID not found in token." });
+            }
+
+            updateBlogDTO.UserId = userId;
+
+            var errors = new List<string>();
+            var response = await _blogService.UpdateBlog(updateBlogDTO, errors);
+
+            if (errors.Count > 0) 
+            {
+                return BadRequest(new { errors });
+            }
+
+            return Ok(new { message = response }); 
         }
     }
 }

@@ -45,6 +45,7 @@ namespace BisleriumProject.Infrastructures.Services
 
                 var blogDTO = new BlogDTO
                 {
+                    Id = blog.Id,
                     Description = blog.Description,
                     CreatedDate = blog.CreatedDate,
                     IsEdited = blog.IsEdited,
@@ -57,51 +58,70 @@ namespace BisleriumProject.Infrastructures.Services
                 blogDTOs.Add(blogDTO);
             }
 
-            return blogDTOs.OrderByDescending(r => r.CreatedDate).ToList(); // Order by CreatedDate
+            return blogDTOs.OrderByDescending(r => r.CreatedDate).ToList(); 
         }
-        
+
+        public async Task<BlogDTO> GetBlogById(int blogId)
+        {
+            var blog = await _blogRepository.GetById(blogId);
+
+            if (blog == null)
+            {
+                throw new KeyNotFoundException("Blog not found."); // Handle case where blog doesn't exist
+            }
+
+            return new BlogDTO
+            {
+                Id = blog.Id,
+                Title = blog.Title,
+                Description = blog.Description,
+                CreatedDate = blog.CreatedDate,
+                IsEdited = blog.IsEdited,
+                Category = blog.Category,
+                Image = blog.Image.ToString(),
+                UserId = blog.UserId
+            };
+        }
+
         public async Task<List<BlogDTO>> GetBlogsByUserId(string userId)
         {
-            // Retrieve all blogs associated with the userId
-            var blogs = await _blogRepository.GetAll(null); // Get all blogs
+            var blogs = await _blogRepository.GetAll(null); 
 
-            // Filter blogs by UserId
             var userBlogs = blogs.Where(blog => blog.UserId == userId).ToList();
 
             var blogDTOs = new List<BlogDTO>();
 
             foreach (var blog in userBlogs)
             {
-                var user = await _userManager.FindByIdAsync(blog.UserId); // Use await to avoid blocking
+                var user = await _userManager.FindByIdAsync(blog.UserId); 
 
                 var blogDTO = new BlogDTO
                 {
+                    Id = blog.Id,
                     Description = blog.Description,
                     CreatedDate = blog.CreatedDate,
                     IsEdited = blog.IsEdited,
                     Category = blog.Category,
                     Image = blog.Image.ToString(),
                     Title = blog.Title,
-                    UserId = user.Id  // Ensure UserId is passed to the DTO
+                    UserId = user.Id  
                 };
 
                 blogDTOs.Add(blogDTO);
             }
 
-            return blogDTOs.OrderByDescending(r => r.CreatedDate).ToList(); // Order by CreatedDate
+            return blogDTOs.OrderByDescending(r => r.CreatedDate).ToList(); 
         }
 
         public async Task<string> AddBlog(AddBlogDTO blogDTO, List<string> errors)
         {
-            // Upload the image to Cloudinary
             var imageId = UploadImageToCloudinary(blogDTO.Image, "Blogs/Images");
             if (imageId == Guid.Empty)
             {
                 errors.Add("Image upload failed.");
-                return null; // Return null to indicate failure
+                return null; 
             }
 
-            // Validate UserId before adding the blog
             var user = await _userManager.FindByIdAsync(blogDTO.UserId);
             if (user == null)
             {
@@ -109,7 +129,6 @@ namespace BisleriumProject.Infrastructures.Services
                 return "Blog addition failed.";
             }
 
-            // Create a new Blog object
             var newBlog = new Blog
             {
                 Description = blogDTO.Description,
@@ -118,15 +137,18 @@ namespace BisleriumProject.Infrastructures.Services
                 CreatedDate = DateTime.UtcNow,
                 Image = imageId,
                 Title = blogDTO.Title,
-                UserId = blogDTO.UserId // Ensure valid UserId
+                UserId = blogDTO.UserId,
+                Score = 0,
+                UpVoteCount = 0,
+                DownVoteCount = 0
             };
 
-            // Add the blog to the repository and commit changes
-            await _blogRepository.Add(newBlog); // Add to repository
-            await _blogRepository.SaveChangesAsync(); // Commit changes
+            await _blogRepository.Add(newBlog); 
+            await _blogRepository.SaveChangesAsync(); 
 
             return "Blog added successfully.";
         }
+
 
 
         public async Task<string> DeleteBlog(int blogId, List<string> errors)
@@ -143,6 +165,47 @@ namespace BisleriumProject.Infrastructures.Services
             await _blogRepository.SaveChangesAsync(); // Ensure SaveChangesAsync() is called
 
             return "Blog deleted successfully.";
+        }
+
+        public async Task<string> UpdateBlog(UpdateBlogDTO updateBlogDTO, List<string> errors)
+        {
+            try
+            {
+                // Fetch the blog to be updated by its ID
+                var existingBlog = await _blogRepository.GetById(updateBlogDTO.BlogId);
+
+                if (existingBlog == null) // Check if the blog exists
+                {
+                    errors.Add("Blog not found.");
+                    return "Blog update failed.";
+                }
+
+                // Update the existing blog with the provided data
+                existingBlog.Title = updateBlogDTO.Title ?? existingBlog.Title; // If null, keep the current value
+                existingBlog.Description = updateBlogDTO.Description ?? existingBlog.Description;
+                existingBlog.Category = updateBlogDTO.Category ?? existingBlog.Category;
+                existingBlog.Score = existingBlog.Score;
+                existingBlog.UpVoteCount = existingBlog.UpVoteCount;
+                existingBlog.DownVoteCount = existingBlog.DownVoteCount;
+                existingBlog.IsEdited = true; // Mark as edited for tracking
+
+                if (updateBlogDTO.Image != null)
+                {
+                    var imageId = UploadImageToCloudinary(updateBlogDTO.Image, "Blogs/Images");
+                    existingBlog.Image = imageId; 
+                }
+
+                // Commit the changes to the database
+                await _blogRepository.Update(existingBlog);
+                await _blogRepository.SaveChangesAsync(); // Commit changes
+
+                return "Blog updated successfully."; // Return success message
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"An error occurred while updating the blog: {ex.Message}");
+                return "Blog update failed."; // Return failure message with error details
+            }
         }
 
         private Guid UploadImageToCloudinary(IFormFile file, string folder)

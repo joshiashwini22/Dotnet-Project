@@ -21,5 +21,10 @@ namespace BisleriumProject.Domain.Entities
         public string UserId { get; set; }
         [ForeignKey(nameof(UserId))]
         public virtual User User { get; set; }
+        public int? Score { get; set; }
+        public int? UpVoteCount { get; set; }
+        public int? DownVoteCount { get; set; }
+
+
     }
 }

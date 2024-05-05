@@ -42,15 +42,24 @@ namespace BisleriumProject.Infrastructures.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("DownVoteCount")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("Image")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsEdited")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("Score")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("UpVoteCount")
+                        .HasColumnType("integer");
 
                     b.Property<string>("UserId")
                         .IsRequired()
