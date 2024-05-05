@@ -1,6 +1,5 @@
 ﻿using BisleriumProject.Application.Common.Interface.IRepositories;
 using BisleriumProject.Application.Helpers;
-using BisleriumProject.Domain.Shared;
 using BisleriumProject.Infrastructures.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,33 +7,76 @@ namespace BisleriumProject.Infrastructures.Repositories
 {
     public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     {
-        protected AppDbContext _appDbContext;
+        //The context is added in Step 5.1
+        private readonly AppDbContext _context;
 
-        
-
-        public RepositoryBase(AppDbContext appDbContext)
+        public RepositoryBase(AppDbContext context)
         {
-            _appDbContext = appDbContext;
+            _context = context;
         }
 
-        public Task<T> Add(T entity)
+        public async Task<T> Add(T entity)
         {
-            throw new NotImplementedException();
+            var addedEntity = (await _context.AddAsync(entity)).Entity;
+            _context.SaveChanges();
+            return addedEntity;
         }
 
-        public void Delete(string entityId)
+        public async Task Delete(T entity)
         {
-            throw new NotImplementedException();
+            if (entity != null)
+            {
+                _context.Remove(entity); // Remove the entity
+                await _context.SaveChangesAsync(); // Commit asynchronously
+            }
         }
 
-        public Task<T>? GetById(string entityId)
+        public async Task<IEnumerable<T>> GetAll(GetRequest<T> request)
         {
-            throw new NotImplementedException();
+            IQueryable<T> query = _context.Set<T>();
+
+            if (request != null)
+            {
+                if (request.Filter != null)
+                {
+                    query = query.Where(request.Filter);
+                }
+
+                if (request.OrderBy != null)
+                {
+                    query = request.OrderBy(query);
+                }
+
+                if (request.Skip.HasValue)
+                {
+                    query = query.Skip(request.Skip.Value);
+                }
+
+                if (request.Take.HasValue)
+                {
+                    query = query.Take(request.Take.Value);
+                }
+            }
+
+            return await query.ToListAsync(); // Use asynchronous database operations
         }
 
-        public Task<T> Update(T entity)
+
+        public async Task<T>? GetById(object entityId)
         {
-            throw new NotImplementedException();
+            return await _context.FindAsync<T>(entityId);
+        }
+
+        public async Task<T> Update(T entity)
+        {
+            var updatedEntity = _context.Update(entity).Entity;
+            await _context.SaveChangesAsync();
+            return updatedEntity;
+        }
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync(); // Commit changes to the database
         }
     }
+
 }

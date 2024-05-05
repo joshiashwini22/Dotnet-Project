@@ -25,7 +25,7 @@ namespace BisleriumProject.Infrastructures.DI
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("dev"),
                 b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)), ServiceLifetime.Transient);
-            return services;
+            
 
             services.AddIdentity<User, IdentityRole>(options =>
             {
@@ -41,16 +41,22 @@ namespace BisleriumProject.Infrastructures.DI
 
             //services.AddScoped<IAppDbContext>(provider => provider.GetService<AppDbContext>());
 
+            services.Configure<CloudinarySettings>(configuration.GetSection("CloudinarySettings"));
+
+
+            services.AddDbContext<AppDbContext>();
+
+
             services.AddTransient(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
             services.AddTransient<IUserRepository, UserRepository>();
-            //services.AddTransient<IPostRepository, PostRepository>();
+            services.AddTransient<IBlogRepository, BlogRepository>();
             //services.AddTransient<ICommentRepository, CommentRepository>();
 
             //services.AddTransient<IAuthenticationService, AuthenticationService>();
 
 
             services.AddTransient<IEmailService, EmailService>();
-            //services.AddTransient<IPostService, PostService>();
+            services.AddTransient<IBlogService, BlogService>();
             //services.AddTransient<ICommentService, CommentService>();
 
             services.AddSingleton<EmailConfiguration>();

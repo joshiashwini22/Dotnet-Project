@@ -7,9 +7,11 @@ namespace BisleriumProject.Application.Common.Interface.IRepositories
     {
         Task<T> Add(T entity);
         Task<T> Update(T entity);
-        void Delete(string entityId);
+        Task Delete(T entity);
 
-        Task<T>? GetById(string entityId);
-        //Task<IEnumerable<T>> GetAll(GetRequest<T>? request);
+        Task<T>? GetById(object entityId);
+        Task<IEnumerable<T>> GetAll(GetRequest<T>? request);
+        Task SaveChangesAsync();
+
     }
 }
