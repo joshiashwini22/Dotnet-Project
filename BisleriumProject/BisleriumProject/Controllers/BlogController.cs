@@ -108,50 +108,84 @@ namespace BisleriumProject.Controllers
         }
 
 
-        [Authorize] 
-        [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteBlog(int id)
-        {
-            var errors = new List<string>();
-            try
-            {
-                var response = _blogService.DeleteBlog(id, errors);
-                if (errors.Count > 0) // If there are validation errors or blog not found, return BadRequest
-                {
-                    return BadRequest(new { errors });
-                }
-                return Ok(new { message = response });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
-            }
-        }
-
         [Authorize]
         [HttpPut("update-blog")]
         public async Task<IActionResult> UpdateBlog([FromForm] UpdateBlogDTO updateBlogDTO)
         {
-
-            // Retrieve the user ID from the JWT claim
-            var userId = User.FindFirst("userId")?.Value; // Adjust based on your JWT claims
-
-            if (string.IsNullOrEmpty(userId)) // If UserId is not found in the token
+            try
             {
-                return Unauthorized(new { message = "User ID not found in token." });
+                var userId = User.FindFirst("userId")?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { message = "User ID not found in token." });
+                }
+
+                var blog = await _blogService.GetBlogById(updateBlogDTO.BlogId);
+
+                if (blog.UserId != userId) // Only allow the blog author to update
+                {
+                    return StatusCode(403, new { message = "Only the blog author can update this post." });
+                }
+
+                var errors = new List<string>();
+                var response = await _blogService.UpdateBlog(updateBlogDTO, errors);
+
+                if (errors.Count > 0)
+                {
+                    return BadRequest(new { errors });
+                }
+
+                return Ok(new { message = response });
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = ex.Message });
+            }
+        }
 
-            updateBlogDTO.UserId = userId;
-
+        [Authorize]
+        [HttpDelete("delete/{blogId}")]
+        public async Task<IActionResult> DeleteBlog(int blogId)
+        {
             var errors = new List<string>();
-            var response = await _blogService.UpdateBlog(updateBlogDTO, errors);
-
-            if (errors.Count > 0) 
+            try
             {
-                return BadRequest(new { errors });
-            }
+                var userId = User.FindFirst("userId")?.Value;
 
-            return Ok(new { message = response }); 
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { message = "User ID not found in token." });
+                }
+
+                var blog = await _blogService.GetBlogById(blogId);
+
+                if (blog.UserId != userId) // Only allow the blog author to delete
+                {
+                    return StatusCode(403, new { message = "Only the blog author can delete this post." });
+                }
+
+                var response = await _blogService.DeleteBlog(blogId, errors);
+
+                if (errors.Count > 0)
+                {
+                    return BadRequest(new { errors });
+                }
+
+                return Ok(new { message = response });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = ex.Message });
+            }
         }
     }
 }

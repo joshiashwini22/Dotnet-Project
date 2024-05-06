@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using BisleriumProject.Application.Common.Interface.IServices;
 using BisleriumProject.Application.DTOs;
+using BisleriumProject.Application.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -123,6 +124,13 @@ public class CommentController : ControllerBase
                 return Unauthorized(new { message = "User ID not found in token." });
             }
 
+            var comment = await _commentService.GetCommentById(updateCommentDTO.Id);
+
+            if (comment.UserId != userId)
+            {
+                return StatusCode(403, new Response(null, new List<string> { "Only the comment author can update this comment." }, HttpStatusCode.Forbidden));
+            }
+
             updateCommentDTO.UserId = userId; // Set the user ID in the DTO
 
             var response = await _commentService.UpdateComment(updateCommentDTO, errors);
@@ -147,14 +155,28 @@ public class CommentController : ControllerBase
         var errors = new List<string>();
         try
         {
+            var userId = User.FindFirst("userId")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new Response(null, new List<string> { "User ID not found in token." }, HttpStatusCode.Unauthorized));
+            }
+
+            var comment = await _commentService.GetCommentById(commentId);
+
+            if (comment.UserId != userId)
+            {
+                return StatusCode(403, new Response(null, new List<string> { "Only the comment author can delete this comment." }, HttpStatusCode.Forbidden));
+            }
+
             var response = await _commentService.DeleteComment(commentId, errors);
 
             if (errors.Count > 0)
             {
-                return BadRequest(new { errors });
+                return BadRequest(new Response(null, errors, HttpStatusCode.BadRequest));
             }
 
-            return Ok(new { message = response });
+            return Ok(new Response(response, new List<string>(), HttpStatusCode.OK));
         }
         catch (Exception ex)
         {
