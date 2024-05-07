@@ -67,6 +67,8 @@ namespace BisleriumProject.Infrastructures.Repositories
             return await _context.FindAsync<T>(entityId);
         }
 
+        
+
         public async Task<T> Update(T entity)
         {
             var updatedEntity = _context.Update(entity).Entity;

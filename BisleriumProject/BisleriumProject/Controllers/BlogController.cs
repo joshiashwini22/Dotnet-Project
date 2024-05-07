@@ -14,6 +14,8 @@ namespace BisleriumProject.Controllers
     public class BlogController : ControllerBase
     {
         private readonly IBlogService _blogService;
+        private const long MaxFileSizeInBytes = 3 * 1024 * 1024; // 3 Megabytes in bytes
+
 
         public BlogController(IBlogService blogService)
         {
@@ -92,6 +94,12 @@ namespace BisleriumProject.Controllers
 
                 blogDTO.UserId = userId;
 
+                // Check if there's an image and validate its size
+                if (blogDTO.Image != null && blogDTO.Image.Length > MaxFileSizeInBytes)
+                {
+                    return BadRequest(new { message = "Image size exceeds the 3 MB limit." });
+                }
+
                 var response = await _blogService.AddBlog(blogDTO, errors); // Ensure awaiting asynchronous operation
 
                 if (errors.Count > 0) // If there are validation errors
@@ -127,7 +135,11 @@ namespace BisleriumProject.Controllers
                 {
                     return StatusCode(403, new { message = "Only the blog author can update this post." });
                 }
-
+                // Check the image file size during update
+                if (updateBlogDTO.Image != null && updateBlogDTO.Image.Length > MaxFileSizeInBytes)
+                {
+                    return BadRequest(new { message = "Image size exceeds the 3 MB limit." });
+                }
                 var errors = new List<string>();
                 var response = await _blogService.UpdateBlog(updateBlogDTO, errors);
 

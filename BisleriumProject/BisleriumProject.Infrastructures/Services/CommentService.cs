@@ -174,7 +174,7 @@ public class CommentService : ICommentService
             return "Delete failed.";
         }
 
-        _commentRepository.Delete(comment); // Delete the comment
+        await _commentRepository.Delete(comment); // Delete the comment
         await _commentRepository.SaveChangesAsync(); // Commit changes
 
         return "Comment deleted successfully.";

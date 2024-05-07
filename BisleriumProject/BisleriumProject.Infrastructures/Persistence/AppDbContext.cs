@@ -20,6 +20,9 @@ namespace BisleriumProject.Infrastructures.Persistence
         public DbSet<User> Users { get; set; }
         public DbSet<Blog> Blogs { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<BlogVote> BlogVotes { get; set; }
+        public DbSet<CommentVote> CommentVotes { get; set; }
+        public DbSet<BlogLogsheet> BlogLogsheets { get; set; }
     }
 
 }

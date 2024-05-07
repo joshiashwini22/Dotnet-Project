@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BisleriumProject.Domain.Entities
 {
-    public class Reaction
+    public class CommentLogsheet
     {
     }
 }

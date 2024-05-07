@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BisleriumProject.Infrastructures.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240505204434_Adding attributes to Blog")]
-    partial class AddingattributestoBlog
+    [Migration("20240507230038_changes")]
+    partial class changes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,7 +45,7 @@ namespace BisleriumProject.Infrastructures.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("DownVoteCount")
+                    b.Property<int?>("DownVoteCount")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("Image")
@@ -54,14 +54,14 @@ namespace BisleriumProject.Infrastructures.Migrations
                     b.Property<bool>("IsEdited")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("Score")
+                    b.Property<int?>("Score")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("UpVoteCount")
+                    b.Property<int?>("UpVoteCount")
                         .HasColumnType("integer");
 
                     b.Property<string>("UserId")
@@ -73,6 +73,81 @@ namespace BisleriumProject.Infrastructures.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Blogs");
+                });
+
+            modelBuilder.Entity("BisleriumProject.Domain.Entities.BlogLogsheet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BlogId")
+                        .HasColumnType("integer");
+
+                    b.Property<List<string>>("Category")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("Image")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BlogLogsheets");
+                });
+
+            modelBuilder.Entity("BisleriumProject.Domain.Entities.BlogVote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BlogId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool?>("IsDownVote")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("IsUpVote")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BlogVotes");
                 });
 
             modelBuilder.Entity("BisleriumProject.Domain.Entities.Comment", b =>
@@ -107,6 +182,39 @@ namespace BisleriumProject.Infrastructures.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("BisleriumProject.Domain.Entities.CommentVote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool?>("IsDownVote")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("IsUpVote")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CommentVotes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -332,6 +440,44 @@ namespace BisleriumProject.Infrastructures.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BisleriumProject.Domain.Entities.BlogLogsheet", b =>
+                {
+                    b.HasOne("BisleriumProject.Domain.Entities.Blog", "blog")
+                        .WithMany()
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BisleriumProject.Domain.Entities.User", "user")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("blog");
+
+                    b.Navigation("user");
+                });
+
+            modelBuilder.Entity("BisleriumProject.Domain.Entities.BlogVote", b =>
+                {
+                    b.HasOne("BisleriumProject.Domain.Entities.Blog", "blog")
+                        .WithMany()
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BisleriumProject.Domain.Entities.User", "user")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("blog");
+
+                    b.Navigation("user");
+                });
+
             modelBuilder.Entity("BisleriumProject.Domain.Entities.Comment", b =>
                 {
                     b.HasOne("BisleriumProject.Domain.Entities.Blog", "Blog")
@@ -349,6 +495,25 @@ namespace BisleriumProject.Infrastructures.Migrations
                     b.Navigation("Blog");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BisleriumProject.Domain.Entities.CommentVote", b =>
+                {
+                    b.HasOne("BisleriumProject.Domain.Entities.Comment", "comment")
+                        .WithMany()
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BisleriumProject.Domain.Entities.User", "user")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("comment");
+
+                    b.Navigation("user");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

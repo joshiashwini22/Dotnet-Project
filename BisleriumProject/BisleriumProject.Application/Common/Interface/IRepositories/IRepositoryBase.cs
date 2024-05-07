@@ -1,4 +1,5 @@
 ﻿using BisleriumProject.Application.Helpers;
+using BisleriumProject.Domain.Entities;
 using BisleriumProject.Domain.Shared;
 
 namespace BisleriumProject.Application.Common.Interface.IRepositories
@@ -12,6 +13,7 @@ namespace BisleriumProject.Application.Common.Interface.IRepositories
         Task<T>? GetById(object entityId);
         Task<IEnumerable<T>> GetAll(GetRequest<T>? request);
         Task SaveChangesAsync();
+
 
     }
 }

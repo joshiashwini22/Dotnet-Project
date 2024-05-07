@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BisleriumProject.Infrastructures.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -171,7 +171,10 @@ namespace BisleriumProject.Infrastructures.Migrations
                     IsEdited = table.Column<bool>(type: "boolean", nullable: false),
                     Category = table.Column<List<string>>(type: "text[]", nullable: false),
                     Image = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false)
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    Score = table.Column<int>(type: "integer", nullable: true),
+                    UpVoteCount = table.Column<int>(type: "integer", nullable: true),
+                    DownVoteCount = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -180,6 +183,35 @@ namespace BisleriumProject.Infrastructures.Migrations
                         name: "FK_Blogs_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BlogVotes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    BlogId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    IsUpVote = table.Column<bool>(type: "boolean", nullable: true),
+                    IsDownVote = table.Column<bool>(type: "boolean", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BlogVotes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BlogVotes_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BlogVotes_Blogs_BlogId",
+                        column: x => x.BlogId,
+                        principalTable: "Blogs",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -209,6 +241,35 @@ namespace BisleriumProject.Infrastructures.Migrations
                         name: "FK_Comments_Blogs_BlogId",
                         column: x => x.BlogId,
                         principalTable: "Blogs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CommentVotes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    CommentId = table.Column<int>(type: "integer", nullable: false),
+                    IsUpVote = table.Column<bool>(type: "boolean", nullable: true),
+                    IsDownVote = table.Column<bool>(type: "boolean", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CommentVotes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CommentVotes_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CommentVotes_Comments_CommentId",
+                        column: x => x.CommentId,
+                        principalTable: "Comments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -251,8 +312,28 @@ namespace BisleriumProject.Infrastructures.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_BlogVotes_BlogId",
+                table: "BlogVotes",
+                column: "BlogId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BlogVotes_UserId",
+                table: "BlogVotes",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Blogs_UserId",
                 table: "Blogs",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CommentVotes_CommentId",
+                table: "CommentVotes",
+                column: "CommentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CommentVotes_UserId",
+                table: "CommentVotes",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -285,10 +366,16 @@ namespace BisleriumProject.Infrastructures.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Comments");
+                name: "BlogVotes");
+
+            migrationBuilder.DropTable(
+                name: "CommentVotes");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Comments");
 
             migrationBuilder.DropTable(
                 name: "Blogs");
