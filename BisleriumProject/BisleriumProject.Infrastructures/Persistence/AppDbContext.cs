@@ -23,6 +23,7 @@ namespace BisleriumProject.Infrastructures.Persistence
         public DbSet<BlogVote> BlogVotes { get; set; }
         public DbSet<CommentVote> CommentVotes { get; set; }
         public DbSet<BlogLogsheet> BlogLogsheets { get; set; }
+        public DbSet<CommentLogsheet> CommentLogsheets { get; set; }
     }
 
 }

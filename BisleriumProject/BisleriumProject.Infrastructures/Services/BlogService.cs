@@ -8,6 +8,7 @@ using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BisleriumProject.Infrastructures.Services
 {
@@ -17,9 +18,10 @@ namespace BisleriumProject.Infrastructures.Services
         private CloudinarySettings _cloudinarySettings;
         private Account _account;
         private readonly IBlogRepository _blogRepository;
+        private readonly IBlogLogsheetRepository _blogLogsheetRepository;
         private readonly UserManager<User> _userManager;
 
-        public BlogService(IBlogRepository blogsRepository, UserManager<User> userManager, IOptions<CloudinarySettings> cloudinarySettingsOptions)
+        public BlogService(IBlogRepository blogsRepository, UserManager<User> userManager, IOptions<CloudinarySettings> cloudinarySettingsOptions, IBlogLogsheetRepository blogLogsheetRepository)
         {
             _cloudinarySettings = cloudinarySettingsOptions.Value;
             _account = new Account(
@@ -29,6 +31,7 @@ namespace BisleriumProject.Infrastructures.Services
             _cloudinary = new Cloudinary(_account);
             _blogRepository = blogsRepository;
             _userManager = userManager;
+            _blogLogsheetRepository = blogLogsheetRepository;
         }
 
         public async Task<List<BlogDTO>> GetAll()
@@ -180,6 +183,7 @@ namespace BisleriumProject.Infrastructures.Services
                     return "Blog update failed.";
                 }
 
+
                 // Update the existing blog with the provided data
                 existingBlog.Title = updateBlogDTO.Title ?? existingBlog.Title; // If null, keep the current value
                 existingBlog.Description = updateBlogDTO.Description ?? existingBlog.Description;
@@ -189,15 +193,38 @@ namespace BisleriumProject.Infrastructures.Services
                 existingBlog.DownVoteCount = existingBlog.DownVoteCount;
                 existingBlog.IsEdited = true; // Mark as edited for tracking
 
+                // Initialize imagelogId with a default value
+                Guid imagelogId = existingBlog.Image;
+
                 if (updateBlogDTO.Image != null)
                 {
                     var imageId = UploadImageToCloudinary(updateBlogDTO.Image, "Blogs/Images");
-                    existingBlog.Image = imageId; 
+                    existingBlog.Image = imageId;
+                    imagelogId = imageId;
                 }
 
                 // Commit the changes to the database
                 await _blogRepository.Update(existingBlog);
                 await _blogRepository.SaveChangesAsync(); // Commit changes
+
+
+
+                // Create a new logsheet entry with the updated details
+                var blogLogsheetDTO = new BlogLogsheet
+                {
+                    Title = existingBlog.Title, // Use the updated title
+                    Description = existingBlog.Description, // Use the updated description
+                    Category = existingBlog.Category, // Use the updated category
+                    BlogId = existingBlog.Id, // ID of the blog
+                    UpdatedAt = DateTime.UtcNow, // Current time of update
+                    UserId = existingBlog.UserId, // User who made the update
+                    Image = imagelogId
+                };
+
+                // Add the logsheet to the repository
+                await _blogLogsheetRepository.Add(blogLogsheetDTO);
+                await _blogLogsheetRepository.SaveChangesAsync(); // Commit changes
+
 
                 return "Blog updated successfully."; // Return success message
             }

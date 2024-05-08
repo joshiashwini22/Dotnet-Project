@@ -2,18 +2,21 @@
 using BisleriumProject.Application.Common.Interface.IServices;
 using BisleriumProject.Application.DTOs;
 using BisleriumProject.Domain.Entities;
+using BisleriumProject.Infrastructures.Repositories;
 using Microsoft.AspNetCore.Identity;
 
 public class CommentService : ICommentService
 {
     private readonly ICommentRepository _commentRepository;
     private readonly UserManager<User> _userManager;
+    private readonly ICommentLogsheetRepository _commentLogsheetRepository;
 
 
-    public CommentService(ICommentRepository commentRepository, UserManager<User> userManager)
+    public CommentService(ICommentRepository commentRepository, UserManager<User> userManager, ICommentLogsheetRepository commentLogsheetRepository)
     {
         _commentRepository = commentRepository;
         _userManager = userManager;
+        _commentLogsheetRepository = commentLogsheetRepository;
     }
 
     public async Task<string> AddComment(AddCommentDTO addCommentDTO, List<string> errors)
@@ -160,6 +163,22 @@ public class CommentService : ICommentService
 
         await _commentRepository.Update(comment); // Update the comment
         await _commentRepository.SaveChangesAsync(); // Commit changes
+
+        // Create a new comment logsheet entry
+        var commentLogsheet = new CommentLogsheet
+        {
+            Description = comment.Description,
+            UpdatedAt = DateTime.UtcNow,
+            CommentId = comment.Id,
+            BlogId = comment.BlogId,
+            UserId = comment.UserId
+        };
+
+        // Add the logsheet entry to the repository
+        await _commentLogsheetRepository.Add(commentLogsheet);
+        await _commentLogsheetRepository.SaveChangesAsync(); // Commit changes
+
+
 
         return "Comment updated successfully.";
     }

@@ -24,7 +24,7 @@ namespace BisleriumProject.Application.DTOs
     {
         public string Title { get; set; }
         public string Description { get; set; }
-        public IFormFile? Image { get; set; }
+        public string Image { get; set; }
         public int BlogId { get; set; }
         public DateTime UpdatedAt { get; set; }
         public List<string> Category { get; set; }

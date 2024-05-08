@@ -52,7 +52,9 @@ namespace BisleriumProject.Infrastructures.DI
             services.AddTransient<IBlogRepository, BlogRepository>();
             services.AddTransient<ICommentRepository, CommentRepository>();
             services.AddTransient<IBlogVoteRepository, BlogVoteRepository>();
+            services.AddTransient<IBlogLogsheetRepository, BlogLogsheetRepository>();
             services.AddTransient<ICommentVoteRepository, CommentVoteRepository>();
+            services.AddTransient<ICommentLogsheetRepository, CommentLogsheetRepository>();
 
             //services.AddTransient<IAuthenticationService, AuthenticationService>();
 
@@ -62,7 +64,9 @@ namespace BisleriumProject.Infrastructures.DI
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ICommentService, CommentService>();
             services.AddTransient<IBlogVoteService, BlogVoteService>();
+            services.AddTransient<IBlogLogsheetService, BlogLogsheetService>();
             services.AddTransient<ICommentVoteService, CommentVoteService>();
+            services.AddTransient<ICommentLogsheetService, CommentLogsheetService>();
 
             services.AddSingleton<EmailConfiguration>();
 
