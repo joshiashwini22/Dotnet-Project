@@ -50,7 +50,7 @@ public class UserService : IUserService
 
     public async Task<string> UpdateUser(UpdateDTO updateUserDTO, List<string> errors)
     {
-        var user = await _userRepository.GetById(updateUserDTO.Id);
+        var user = await _userManager.FindByIdAsync(updateUserDTO.Id);
 
         if (user == null)
         {
