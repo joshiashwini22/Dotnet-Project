@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using BisleriumProject.Domain.Entities;
+using Microsoft.AspNetCore.SignalR;
 
 public class NotificationHub : Hub
 {

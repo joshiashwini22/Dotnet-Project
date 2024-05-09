@@ -16,7 +16,6 @@ namespace BisleriumProject.Application.DTOs
         public bool? IsUpVote { get; set; }
         public bool? IsDownVote { get; set; }
         public DateTime CreatedDate { get; set; }
-
     }
 
     public class UpvoteCommentDTO

@@ -86,7 +86,7 @@ namespace BisleriumProject.Controllers
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
             {
-                return BadRequest(new Response(null, new List<string> { "User already exists." }, HttpStatusCode.BadRequest));
+                return StatusCode((int)HttpStatusCode.BadRequest, new Response(null, new List<string> { "User already exists." }, HttpStatusCode.BadRequest));
             }
 
 
@@ -94,13 +94,15 @@ namespace BisleriumProject.Controllers
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Username
+                UserName = model.Username,
+                FirstName = model.FirstName,
+                LastName = model.LastName
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new Response(null, new List<string> { "User creation failed. Please check the details and try again." }, HttpStatusCode.InternalServerError));
+                return StatusCode((int)HttpStatusCode.BadRequest, new Response(null, new List<string> { "User creation failed. Please check the details and try again." }, HttpStatusCode.BadRequest));
             }
 
             // Ensure the admin role exists, create if necessary

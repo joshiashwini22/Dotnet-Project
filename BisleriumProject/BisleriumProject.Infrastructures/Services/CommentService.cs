@@ -198,4 +198,10 @@ public class CommentService : ICommentService
 
         return "Comment deleted successfully.";
     }
+
+    public async Task<string> GetUserNameById(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        return user?.UserName;
+    }
 }

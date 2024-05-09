@@ -29,5 +29,15 @@ namespace BisleriumProject.Application.DTOs
         [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match")]
         public string ConfirmPassword { get; set; } // Optional: password confirmation
     }
-    
+
+    public class UpdateUserDTO
+    {
+        public string? Id { get; set; }
+
+        public string UserName { get; set; }
+
+        public string FirstName { get; set; }
+
+        public string LastName { get; set; }
+    }
 }

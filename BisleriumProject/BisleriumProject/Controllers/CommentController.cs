@@ -39,6 +39,16 @@ public class CommentController : ControllerBase
         try
         {
             var comments = await _commentService.GetAll();
+            var userId = User.FindFirst("userId")?.Value;
+
+            foreach (var comment in comments)
+                {
+                    var userName = await _blogService.GetUserNameById(comment.UserId);
+                    comment.UserName = userName;
+                    comment.IsMine = comment.UserId == userId;
+
+                }
+
             return Ok(comments);
         }
         catch (Exception ex)
@@ -55,12 +65,20 @@ public class CommentController : ControllerBase
         {
             var userId = User.FindFirst("userId")?.Value; // Retrieve user ID from JWT token
 
+
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized(new { message = "User ID not found in token." });
             }
 
             var commentDTOs = await _commentService.GetCommentsByUserId(userId);
+            foreach (var comment in commentDTOs)
+            {
+                var userName = await _blogService.GetUserNameById(comment.UserId);
+                comment.UserName = userName;
+                comment.IsMine = comment.UserId == userId;
+
+            }
             return Ok(commentDTOs);
         }
         catch (KeyNotFoundException ex)

@@ -11,7 +11,6 @@ namespace BisleriumProject.Application.Common.Interface.IServices
 {
     public interface IEmailService
     {
-        Response SendEmail(EmailMessage message, List<string> errors);
-        Task SendEmailAsync(EmailMessage message);
+        Task SendEmailAsync(string to, string toDisplayName, string subject, string htmlBody);
     }
 }

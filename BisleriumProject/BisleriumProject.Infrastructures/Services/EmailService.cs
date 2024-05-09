@@ -1,133 +1,46 @@
-﻿using BisleriumProject.Application.Common.Interface.IRepositories;
-using BisleriumProject.Application.Common.Interface.IServices;
-using BisleriumProject.Application.Helpers;
-using BisleriumProject.Domain.Auth;
-using BisleriumProject.Domain.Entities;
+﻿using BisleriumProject.Application.Common.Interface.IServices;
 using MailKit.Net.Smtp;
-using MailKit.Security;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using MimeKit;
-using Org.BouncyCastle.Asn1.Ocsp;
-using System.Net;
 
 namespace BisleriumProject.Infrastructures.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly EmailConfiguration _emailConfig;
-        private readonly IUserRepository _userRepository;
-        private readonly UserManager<User> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public EmailService(IOptions<EmailConfiguration> emailConfig, UserManager<User> userManager)
+        public EmailService(IConfiguration configuration)
         {
-            _emailConfig = emailConfig.Value;
-            _userManager = userManager;
-        }
-        public Response SendEmail(EmailMessage message, List<string> errors)
-        {
-            var emails = message.To.Select(x => x.Address).ToList();
-
-            if (emails.Count == 0)
-            {
-                errors.Add("Please enter your email.");
-                return new Response(null, errors, HttpStatusCode.BadRequest);
-            }
-
-
-            foreach (var email in emails)
-            {
-                var user = _userManager.FindByEmailAsync(email);
-
-                if (user == null)
-                {
-                    errors.Add($"User with email {email} does not exist.");
-                    return new Response(null, errors, HttpStatusCode.BadRequest);
-                }
-
-                var emailMessage = CreateEmailMessage(message);
-                Send(emailMessage);
-            }
-
-            return new Response($"Emails sent to {string.Join(", ", emails)}", null, HttpStatusCode.OK);
+            _configuration = configuration;
         }
 
-        public async Task SendEmailAsync(EmailMessage message)
-        {
-            var emailMessage = CreateEmailMessage(message);
-            await SendAsync(emailMessage);
-        }
-
-        private MimeMessage CreateEmailMessage(EmailMessage message)
+        public async Task SendEmailAsync(string to, string toDisplayName, string subject, string htmlBody)
         {
             var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress("email", _emailConfig.From));
-            emailMessage.To.AddRange(message.To);
-            emailMessage.Subject = message.Subject;
-            var bodyBuilder = new BodyBuilder() { HtmlBody = message.Content };
 
-            if (message.Attachments != null && message.Attachments.Any())
+            // Fetching 'From' display name and email from configuration
+            string fromDisplayName = _configuration["EmailConfiguration:FromDisplayName"];
+            string fromEmail = _configuration["EmailConfiguration:FromEmail"];
+            emailMessage.From.Add(new MailboxAddress(fromDisplayName, fromEmail));
+
+            // Assuming 'to' includes the full email address and 'toDisplayName' is provided
+            emailMessage.To.Add(new MailboxAddress(toDisplayName, to));
+
+            emailMessage.Subject = subject;
+            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
             {
-                byte[] fileBytes;
-                foreach (var attachment in message.Attachments)
-                {
-                    using (var ms = new MemoryStream())
-                    {
-                        attachment.CopyTo(ms);
-                        fileBytes = ms.ToArray();
-                    }
-                    bodyBuilder.Attachments.Add(attachment.FileName, fileBytes, ContentType.Parse(attachment.ContentType));
-                }
-            }
-            emailMessage.Body = bodyBuilder.ToMessageBody();
-            return emailMessage;
+                Text = htmlBody
+            };
+
+            using var client = new SmtpClient();
+            await client.ConnectAsync(_configuration["EmailConfiguration:SetupServer"], int.Parse(_configuration["EmailConfiguration:Port"]), MailKit.Security.SecureSocketOptions.StartTls);
+            await client.AuthenticateAsync(_configuration["EmailConfiguration:Username"], _configuration["EmailConfiguration:Password"]);
+            await client.SendAsync(emailMessage);
+            await client.DisconnectAsync(true);
         }
 
-        private void Send(MimeMessage mailMessage)
-        {
-            using (var client = new SmtpClient())
-            {
-                try
-                {
-                    client.Connect(_emailConfig.SmtpServer, _emailConfig.Port, SecureSocketOptions.StartTls);
-                    client.AuthenticationMechanisms.Remove("XOAUTH2");
-                    client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
-                    client.Send(mailMessage);
-                }
-                catch
-                {
-                    throw;
-                }
-                finally
-                {
-                    client.Disconnect(true);
-                    client.Dispose();
-                }
-            }
-        }
 
-        private async Task SendAsync(MimeMessage mailMessage)
-        {
-            using (var client = new SmtpClient())
-            {
-                try
-                {
-                    await client.ConnectAsync(_emailConfig.SmtpServer, _emailConfig.Port);
-                    client.AuthenticationMechanisms.Remove("XOAUTH2");
-                    await client.AuthenticateAsync(_emailConfig.UserName, _emailConfig.Password);
-                    await client.SendAsync(mailMessage);
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-                finally
-                {
-                    await client.DisconnectAsync(true);
-                    client.Dispose();
-                }
-            }
-        }
+
     }
 }
 

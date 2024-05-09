@@ -14,8 +14,10 @@ namespace BisleriumProject.Application.DTOs
         public string Description { get; set; }
         public DateTime CreatedDate { get; set; } // When the comment was created
         public bool IsEdited { get; set; }
+        public bool IsMine { get; set; }
         public int BlogId { get; set; } // Blog to which this comment belongs
         public string? UserId { get; set; } // User who created the comment
+        public string UserName { get; set; }
 
     }
     public class AddCommentDTO

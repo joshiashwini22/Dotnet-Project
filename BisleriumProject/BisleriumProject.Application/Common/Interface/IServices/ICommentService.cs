@@ -16,5 +16,7 @@ namespace BisleriumProject.Application.Common.Interface.IServices
         Task<string> DeleteComment(int id, List<string> errors);
         Task<string> UpdateComment(UpdateCommentDTO updateCommentDTO, List<string> errors);
         Task<CommentDTO> GetCommentById(int commentId);
+        Task<string> GetUserNameById(string userId);
+
     }
 }

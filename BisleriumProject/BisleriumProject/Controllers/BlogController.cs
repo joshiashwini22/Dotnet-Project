@@ -5,6 +5,7 @@ using BisleriumProject.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Reflection.Metadata;
 
 namespace BisleriumProject.Controllers
 {
@@ -29,12 +30,16 @@ namespace BisleriumProject.Controllers
             try
             {
                 var blogs = await _blogService.GetAll();
+                var userId = User.FindFirst("userId")?.Value;
+
 
                 // Fetch user name for each blog
                 foreach (var blog in blogs)
                 {
                     var userName = await _blogService.GetUserNameById(blog.UserId);
                     blog.UserName = userName;
+                    blog.IsMine = blog.UserId == userId;
+
                 }
 
                 return Ok(blogs);
@@ -48,12 +53,15 @@ namespace BisleriumProject.Controllers
         [HttpGet("sorted")]
         public async Task<IActionResult> GetAllSorted(string sortBy = "random", int pageNumber = 1, int pageSize = 10)
         {
+            var userId = User.FindFirst("userId")?.Value;
+
             var (blogs, totalPages, totalCount) = await _blogService.GetAllSorted(sortBy, pageNumber, pageSize);
 
             foreach (var blog in blogs)
             {
                 var userName = await _blogService.GetUserNameById(blog.UserId);
                 blog.UserName = userName;
+                blog.IsMine = blog.UserId == userId;
             }
 
             var response = new
@@ -73,11 +81,15 @@ namespace BisleriumProject.Controllers
         {
             try
             {
+                var userId = User.FindFirst("userId")?.Value;
+
                 var blogDTO = await _blogService.GetBlogById(blogId); // Call the service method
 
                 // Fetch user name for the blog
                 var userName = await _blogService.GetUserNameById(blogDTO.UserId);
                 blogDTO.UserName = userName;
+                blogDTO.IsMine = blogDTO.UserId == userId;
+
 
                 return Ok(blogDTO); // Return the blog DTO
             }
@@ -106,6 +118,8 @@ namespace BisleriumProject.Controllers
                 {
                     var userName = await _blogService.GetUserNameById(blog.UserId);
                     blog.UserName = userName;
+                    blog.IsMine = blog.UserId == userId;
+
                 }
 
                 return Ok(blogDTOs);

@@ -262,7 +262,8 @@ namespace BisleriumProject.Infrastructures.Services
                 existingBlog.Score = existingBlog.Score;
                 existingBlog.UpVoteCount = existingBlog.UpVoteCount;
                 existingBlog.DownVoteCount = existingBlog.DownVoteCount;
-                existingBlog.IsEdited = true; // Mark as edited for tracking
+                existingBlog.IsEdited = true;
+                existingBlog.CreatedDate = DateTime.UtcNow;
 
                 // Initialize imagelogId with a default value
                 Guid imagelogId = existingBlog.Image;
