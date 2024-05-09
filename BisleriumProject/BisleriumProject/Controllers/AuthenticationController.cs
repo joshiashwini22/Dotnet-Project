@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using BisleriumProject.Application.DTOs;
 using BisleriumProject.Application.Helpers;
 using BisleriumProject.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -40,11 +41,11 @@ namespace BisleriumProject.Controllers
 
             var userRoles = await _userManager.GetRolesAsync(user);
             var authClaims = new List<Claim>
-        {
-            new Claim("name", user.UserName), // User name claim
-            new Claim("userId", user.Id), // Custom claim key for UserId
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique token ID
-        };
+    {
+        new Claim("name", user.UserName), // User name claim
+        new Claim("userId", user.Id), // Custom claim key for UserId
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique token ID
+    };
 
             // Add role claims
             foreach (var role in userRoles)
@@ -65,12 +66,20 @@ namespace BisleriumProject.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var jwtToken = tokenHandler.WriteToken(token);
 
+            // Return the token along with user ID and role
             return Ok(new Response(
-                new { token = jwtToken, expiration = token.ValidTo },
+                new
+                {
+                    token = jwtToken,
+                    expiration = token.ValidTo,
+                    userId = user.Id,
+                    role = userRoles.FirstOrDefault()
+                },
                 null,
                 HttpStatusCode.OK
             ));
         }
+
 
         [HttpPost]
         [Route("register")]
@@ -99,7 +108,11 @@ namespace BisleriumProject.Controllers
             // Ensure the admin role exists, create if necessary
             if (!await _roleManager.RoleExistsAsync(UserRoles.User))
             {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+                var role = new IdentityRole(UserRoles.User)
+                {
+                    ConcurrencyStamp = Guid.NewGuid().ToString() // Ensure concurrency stamp
+                };
+                await _roleManager.CreateAsync(role);
             }
 
             await _userManager.AddToRoleAsync(user, UserRoles.User);
@@ -111,6 +124,8 @@ namespace BisleriumProject.Controllers
             ));
         }
 
+
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("register-admin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
@@ -134,11 +149,15 @@ namespace BisleriumProject.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, new Response(null, new List<string> { "User creation failed. Please check the details and try again." }, HttpStatusCode.InternalServerError));
             }
 
-            // Ensure the admin role exists, create if necessary
             if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
             {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+                var role = new IdentityRole(UserRoles.Admin)
+                {
+                    ConcurrencyStamp = Guid.NewGuid().ToString() // Ensure concurrency stamp
+                };
+                await _roleManager.CreateAsync(role);
             }
+
 
             await _userManager.AddToRoleAsync(user, UserRoles.Admin);
 

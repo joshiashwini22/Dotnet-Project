@@ -55,6 +55,9 @@ namespace BisleriumProject.Infrastructures.Services
                     Category = blog.Category,
                     Image = blog.Image.ToString(),
                     Title = blog.Title,
+                    Score = blog.Score ?? 0,
+                    UpVoteCount = blog.UpVoteCount ?? 0,
+                    DownVoteCount = blog.DownVoteCount ?? 0,
                     UserId = user.Id  // Ensure UserId is passed to the DTO
                 };
 
@@ -82,6 +85,9 @@ namespace BisleriumProject.Infrastructures.Services
                 IsEdited = blog.IsEdited,
                 Category = blog.Category,
                 Image = blog.Image.ToString(),
+                Score = blog.Score ?? 0,
+                UpVoteCount = blog.UpVoteCount ?? 0,
+                DownVoteCount = blog.DownVoteCount ?? 0,
                 UserId = blog.UserId
             };
         }
@@ -107,6 +113,9 @@ namespace BisleriumProject.Infrastructures.Services
                     Category = blog.Category,
                     Image = blog.Image.ToString(),
                     Title = blog.Title,
+                    Score = blog.Score ?? 0,
+                    UpVoteCount = blog.UpVoteCount ?? 0,
+                    DownVoteCount = blog.DownVoteCount ?? 0,
                     UserId = user.Id  
                 };
 
@@ -118,6 +127,11 @@ namespace BisleriumProject.Infrastructures.Services
 
         public async Task<string> AddBlog(AddBlogDTO blogDTO, List<string> errors)
         {
+            if (blogDTO.Image == null)
+            {
+                
+                return "There is no image";
+            }
             var imageId = UploadImageToCloudinary(blogDTO.Image, "Blogs/Images");
             if (imageId == Guid.Empty)
             {
@@ -239,6 +253,7 @@ namespace BisleriumProject.Infrastructures.Services
         {
             using (var stream = new MemoryStream())
             {
+                
                 file.CopyTo(stream);
                 stream.Position = 0;
                 var uploadParams = new ImageUploadParams()
@@ -261,6 +276,15 @@ namespace BisleriumProject.Infrastructures.Services
                 return Guid.Parse(guidPart);
             }
         }
+
+        public async Task<string> GetUserNameById(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            return user?.UserName;
+        }
+
+
+        
 
 
     }

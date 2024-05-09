@@ -29,6 +29,14 @@ namespace BisleriumProject.Controllers
             try
             {
                 var blogs = await _blogService.GetAll();
+
+                // Fetch user name for each blog
+                foreach (var blog in blogs)
+                {
+                    var userName = await _blogService.GetUserNameById(blog.UserId);
+                    blog.UserName = userName;
+                }
+
                 return Ok(blogs);
             }
             catch (Exception ex)
@@ -37,6 +45,7 @@ namespace BisleriumProject.Controllers
             }
         }
 
+
         [AllowAnonymous]
         [HttpGet("get-by-id/{blogId}")]
         public async Task<IActionResult> GetBlogById(int blogId) // Get blog by ID
@@ -44,6 +53,11 @@ namespace BisleriumProject.Controllers
             try
             {
                 var blogDTO = await _blogService.GetBlogById(blogId); // Call the service method
+
+                // Fetch user name for the blog
+                var userName = await _blogService.GetUserNameById(blogDTO.UserId);
+                blogDTO.UserName = userName;
+
                 return Ok(blogDTO); // Return the blog DTO
             }
             catch (KeyNotFoundException ex) // Handle case where the blog doesn't exist
@@ -62,9 +76,17 @@ namespace BisleriumProject.Controllers
         {
             try
             {
-                var userId = User.FindFirst("userId")?.Value; 
+                var userId = User.FindFirst("userId")?.Value;
 
                 var blogDTOs = await _blogService.GetBlogsByUserId(userId);
+
+                // Fetch user name for each blog
+                foreach (var blog in blogDTOs)
+                {
+                    var userName = await _blogService.GetUserNameById(blog.UserId);
+                    blog.UserName = userName;
+                }
+
                 return Ok(blogDTOs);
             }
             catch (KeyNotFoundException ex)
@@ -76,6 +98,7 @@ namespace BisleriumProject.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
 
         [Authorize] 
         [HttpPost("add")]

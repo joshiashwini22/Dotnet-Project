@@ -22,6 +22,7 @@ namespace BisleriumProject.Application.DTOs
         public int Score { get; set; }
         public int UpVoteCount { get; set; }
         public int DownVoteCount { get; set; }
+        public string UserName { get; set; }
 
     }
     public class AddBlogDTO

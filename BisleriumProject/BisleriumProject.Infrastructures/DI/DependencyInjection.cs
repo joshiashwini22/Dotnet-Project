@@ -67,6 +67,7 @@ namespace BisleriumProject.Infrastructures.DI
             services.AddTransient<IBlogLogsheetService, BlogLogsheetService>();
             services.AddTransient<ICommentVoteService, CommentVoteService>();
             services.AddTransient<ICommentLogsheetService, CommentLogsheetService>();
+            services.AddTransient<IAdminDashboardService, AdminDashboardService>();
 
             services.AddSingleton<EmailConfiguration>();
 

@@ -9,5 +9,7 @@ namespace BisleriumProject.Application.Common.Interface.IRepositories
 {
     public interface ICommentRepository : IRepositoryBase<Comment>
     {
+        Task<int> GetAllCommentsCount();
+        Task<int> GetCommentsCountForMonth(int month, int year);
     }
 }

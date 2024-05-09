@@ -1,6 +1,4 @@
 ﻿using BisleriumProject.Application.DTOs;
-using BisleriumProject.Application.Helpers;
-using BisleriumProject.Domain.Entities;
 
 namespace BisleriumProject.Application.Common.Interface.IServices
 {
@@ -12,6 +10,8 @@ namespace BisleriumProject.Application.Common.Interface.IServices
         Task<string> DeleteBlog(int id,List<string> errors);
         Task<string> UpdateBlog(UpdateBlogDTO updateBlogDTO, List<string> errors);
         Task<BlogDTO> GetBlogById(int blogId);
+        Task<string> GetUserNameById(string userId);
+
 
     }
 }
