@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BisleriumProject.Application.Common.Interface.IServices;
 using BisleriumProject.Application.DTOs;
+using BisleriumProject.Application.Common_Interfaces.IServices;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BisleriumProject.Controllers
 {
@@ -13,10 +15,23 @@ namespace BisleriumProject.Controllers
     public class CommentVoteController : ControllerBase
     {
         private readonly ICommentVoteService _commentVoteService;
+        private readonly IHubContext<NotificationHub> _notificationHub;
+        private readonly ICommentService _commentService; // To get comment details, assuming this exists
+        private readonly INotificationService _notificationService;
+        private readonly IUserService _userService;
 
-        public CommentVoteController(ICommentVoteService commentVoteService)
+
+        public CommentVoteController(ICommentVoteService commentVoteService,
+                        IHubContext<NotificationHub> notificationHub,
+                        ICommentService commentService, // Ensure this service can fetch comment details
+                        INotificationService notificationService,
+                        IUserService userService)
         {
             _commentVoteService = commentVoteService;
+            _notificationHub = notificationHub;
+            _commentService = commentService;
+            _notificationService = notificationService;
+            _userService = userService;
         }
 
         [HttpGet("get-all")]
@@ -55,12 +70,37 @@ namespace BisleriumProject.Controllers
             }
 
             upvoteCommentDTO.UserId = userId;
-
             var response = await _commentVoteService.UpvoteComment(upvoteCommentDTO, errors);
 
             if (errors.Count > 0)
             {
                 return BadRequest(new { errors });
+            }
+
+            var comment = await _commentService.GetCommentById(upvoteCommentDTO.CommentId);
+            if (comment == null)
+            {
+                return NotFound(new { message = "Comment not found." });
+            }
+
+            var authorId = comment.UserId;
+            var upvoterName = await _userService.GetUserNameById(userId); // Correct service used here
+
+            if (userId != authorId)
+            {
+                var notificationMessage = $"{upvoterName} liked your comment.";
+                await _notificationHub.Clients.User(authorId).SendAsync("ReceiveNotification", notificationMessage);
+
+                var notificationDto = new NotificationDTO
+                {
+                    SenderId = userId,
+                    ReceiverId = authorId,
+                    Message = notificationMessage,
+                    IsRead = false,
+                    Timestamp = DateTime.UtcNow
+                };
+
+                await _notificationService.SaveNotificationAsync(notificationDto);
             }
 
             return Ok(new { message = response });

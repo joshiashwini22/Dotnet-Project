@@ -1,7 +1,9 @@
 ﻿using BisleriumProject.Application.Common.Interface.IRepositories;
 using BisleriumProject.Application.Common.Interface.IServices;
+using BisleriumProject.Application.Common_Interfaces.IServices;
 using BisleriumProject.Domain.Auth;
 using BisleriumProject.Domain.Entities;
+using BisleriumProject.Infrastructure.Services;
 using BisleriumProject.Infrastructures.Persistence;
 using BisleriumProject.Infrastructures.Repositories;
 using BisleriumProject.Infrastructures.Services;
@@ -68,6 +70,7 @@ namespace BisleriumProject.Infrastructures.DI
             services.AddTransient<ICommentVoteService, CommentVoteService>();
             services.AddTransient<ICommentLogsheetService, CommentLogsheetService>();
             services.AddTransient<IAdminDashboardService, AdminDashboardService>();
+            services.AddTransient<INotificationService, NotificationService>();
 
             services.AddSingleton<EmailConfiguration>();
 

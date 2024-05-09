@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using BisleriumProject.Application.DTOs;
 using BisleriumProject.Application.Helpers;
 using BisleriumProject.Domain.Entities;
@@ -88,7 +86,7 @@ namespace BisleriumProject.Controllers
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new Response(null, new List<string> { "User already exists." }, HttpStatusCode.InternalServerError));
+                return BadRequest(new Response(null, new List<string> { "User already exists." }, HttpStatusCode.BadRequest));
             }
 
 
@@ -133,7 +131,7 @@ namespace BisleriumProject.Controllers
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new Response(null, new List<string> { "User already exists." }, HttpStatusCode.InternalServerError));
+                return BadRequest(new Response(null, new List<string> { "User already exists." }, HttpStatusCode.BadRequest));
             }
 
             var user = new User

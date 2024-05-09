@@ -3,20 +3,33 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using BisleriumProject.Application.Common.Interface.IServices;
+using BisleriumProject.Application.Common_Interfaces.IServices;
 using BisleriumProject.Application.DTOs;
 using BisleriumProject.Application.Helpers;
+using BisleriumProject.Infrastructures.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+
 
 [Route("api/[controller]")]
 [ApiController]
 public class CommentController : ControllerBase
 {
     private readonly ICommentService _commentService;
+    private readonly IHubContext<NotificationHub> _notificationHub;
+    private readonly IBlogService _blogService;
+    private readonly INotificationService _notificationService;
 
-    public CommentController(ICommentService commentService)
+    public CommentController(ICommentService commentService,
+                         IHubContext<NotificationHub> notificationHub,
+                         IBlogService blogService,
+                         INotificationService notificationService)
     {
         _commentService = commentService;
+        _notificationHub = notificationHub;
+        _blogService = blogService;
+        _notificationService = notificationService;
     }
 
     [HttpGet("all")]
@@ -87,19 +100,46 @@ public class CommentController : ControllerBase
         try
         {
             var userId = User.FindFirst("userId")?.Value; // Retrieve user ID from JWT token
-
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized(new { message = "User ID not found in token." });
             }
 
             createCommentDTO.UserId = userId; // Set the user ID in the DTO
-
             var response = await _commentService.AddComment(createCommentDTO, errors);
-
             if (errors.Count > 0)
             {
                 return BadRequest(new { errors });
+            }
+
+            // Fetch the blog to get the blog author's ID
+            var blog = await _blogService.GetBlogById(createCommentDTO.BlogId);
+            if (blog == null)
+            {
+                return NotFound(new { message = "Blog not found." });
+            }
+
+            var authorId = blog.UserId;
+            var commentAuthorName = await _blogService.GetUserNameById(userId); // Assuming this method exists
+
+            // Check if the commenter is not the author
+            if (userId != authorId)
+            {
+                var notificationMessage = $"{commentAuthorName} added a comment on your blog.";
+                var notificationDto = new NotificationDTO
+                {
+                    SenderId = userId,
+                    ReceiverId = authorId,
+                    Message = notificationMessage,
+                    IsRead = false,
+                    Timestamp = DateTime.UtcNow
+                };
+
+                // Send real-time notification
+                await _notificationHub.Clients.User(authorId).SendAsync("ReceiveNotification", notificationMessage);
+
+                // Save the notification in the database
+                await _notificationService.SaveNotificationAsync(notificationDto);
             }
 
             return Ok(new { message = response });
